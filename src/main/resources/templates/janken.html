@@ -9,10 +9,9 @@
 
 <body>
   <h1>Janken GAME!</h1>
-  <form action="/janken" method="post">
-    <input type="text" name="userName">
-    <input type="submit" value="入室">
-  </form>
+  <div th:if="${userName}">
+    Hi [[${userName}]]
+  </div>
 </body>
 
 </html>
