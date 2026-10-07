@@ -12,6 +12,16 @@
   <div th:if="${userName}">
     Hi [[${userName}]]
   </div>
+
+  <a th:href="@{/janken(hand='Gu')}">ぐー</a>
+  <a th:href="@{/janken(hand='Choki')}">ちょき</a>
+  <a th:href="@{/janken(hand='Pa')}">ぱー</a>
+
+  <div th:if="${janken}">
+    <p>あなたの手: [[${janken.userHand}]]</p>
+    <p>相手の手: [[${janken.cpuHand}]]</p>
+    <p>結果: [[${janken.result}]]</p>
+  </div>
 </body>
 
 </html>
