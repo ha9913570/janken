@@ -23,7 +23,10 @@ public class JankenAuthConfiguration {
             .requestMatchers("/janken/**").authenticated()
             .anyRequest().permitAll())
         .csrf(csrf -> csrf
-            .ignoringRequestMatchers("/janken*/**"));
+            .ignoringRequestMatchers("/janken*/**", "/h2-console/**"))
+        .headers(headers -> headers
+            .frameOptions(frameOptions -> frameOptions
+                .sameOrigin()));
     return http.build();
   }
 
