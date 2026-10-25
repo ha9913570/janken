@@ -12,11 +12,18 @@
   <h1>Match</h1>
   <h2><span sec:authentication="name"></span> V.S. [[${user2.userName}]]</h2>
 
-  <a href="">ぐー</a>
-  <a href="">ちょき</a>
-  <a href="">ぱー</a>
+  <a th:href="@{/fight(id=${user2.id},hand=Gu)}">ぐー</a>
+  <a th:href="@{/fight(id=${user2.id},hand=Choki)}">ちょき</a>
+  <a th:href="@{/fight(id=${user2.id},hand=Pa)}">ぱー</a>
 
   <br />
+
+  <div th:if="${match}">
+    <p>あなたの手 [[${match.user1Hand}]]</p>
+    <p>相手の手 [[${match.user2Hand}]]</p>
+    <p>結果 [[${result}]]</p>
+  </div>
+
   <a href="/janken">もどる</a>
 </body>
 

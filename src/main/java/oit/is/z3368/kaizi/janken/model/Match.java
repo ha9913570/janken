@@ -7,6 +7,10 @@ public class Match {
   String user1Hand;
   String user2Hand;
 
+  public Match() {
+    user2Hand = "Gu";
+  }
+
   // getter
   public int getId() {
     return id;
