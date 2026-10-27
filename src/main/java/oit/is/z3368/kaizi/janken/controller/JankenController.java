@@ -49,6 +49,7 @@ public class JankenController {
     match.setUser1(user1.getId());
     match.setUser2(user2.getId());
     match.setUser1Hand(hand);
+    match.setIsActive(false);
     matchMapper.insertMatch(match);
 
     model.addAttribute("user2", user2);
