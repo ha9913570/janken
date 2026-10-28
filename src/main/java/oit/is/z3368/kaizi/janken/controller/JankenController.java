@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import oit.is.z3368.kaizi.janken.model.Match;
+import oit.is.z3368.kaizi.janken.model.MatchInfo;
+import oit.is.z3368.kaizi.janken.model.MatchInfoMapper;
 import oit.is.z3368.kaizi.janken.model.User;
 import oit.is.z3368.kaizi.janken.model.UserMapper;
 import oit.is.z3368.kaizi.janken.model.MatchMapper;
@@ -23,12 +25,17 @@ public class JankenController {
   @Autowired
   private MatchMapper matchMapper;
 
+  @Autowired
+  private MatchInfoMapper matchInfoMapper;
+
   @GetMapping("/janken")
   public String showJanken(ModelMap model) {
     ArrayList<User> users = userMapper.selectAllUsers();
     ArrayList<Match> matches = matchMapper.selectAllMatches();
+    ArrayList<MatchInfo> activeMatchInfos = matchInfoMapper.selectActiveMatchInfos();
     model.addAttribute("users", users);
     model.addAttribute("matches", matches);
+    model.addAttribute("activeMatchInfos", activeMatchInfos);
 
     return "janken.html";
   }
@@ -45,18 +52,15 @@ public class JankenController {
   public String showFight(@RequestParam Integer id, @RequestParam String hand, Principal prin, ModelMap model) {
     User user1 = userMapper.selectUserByName(prin.getName());
     User user2 = userMapper.selectUserById(id);
-    Match match = new Match();
-    match.setUser1(user1.getId());
-    match.setUser2(user2.getId());
-    match.setUser1Hand(hand);
-    match.setIsActive(false);
-    matchMapper.insertMatch(match);
+    MatchInfo matchInfo = new MatchInfo();
+    matchInfo.setUser1(user1.getId());
+    matchInfo.setUser2(user2.getId());
+    matchInfo.setUser1Hand(hand);
+    matchInfo.setIsActive(true);
 
-    model.addAttribute("user2", user2);
-    model.addAttribute("result", JankenJudge(hand, match.getUser2Hand()));
-    model.addAttribute("match", match);
+    matchInfoMapper.insertMatchInfo(matchInfo);
 
-    return "match.html";
+    return "wait.html";
   }
 
   // じゃんけんの勝敗を判定する関数
