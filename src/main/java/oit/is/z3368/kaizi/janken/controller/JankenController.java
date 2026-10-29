@@ -52,15 +52,29 @@ public class JankenController {
   public String showFight(@RequestParam Integer id, @RequestParam String hand, Principal prin, ModelMap model) {
     User user1 = userMapper.selectUserByName(prin.getName());
     User user2 = userMapper.selectUserById(id);
-    MatchInfo matchInfo = new MatchInfo();
-    matchInfo.setUser1(user1.getId());
-    matchInfo.setUser2(user2.getId());
-    matchInfo.setUser1Hand(hand);
-    matchInfo.setIsActive(true);
 
-    matchInfoMapper.insertMatchInfo(matchInfo);
+    MatchInfo activeMatchInfo = matchInfoMapper.selectActiveMatchInfoByUser2(user2.getId());
+    if (activeMatchInfo == null) {
+      MatchInfo matchInfo = new MatchInfo();
+      matchInfo.setUser1(user1.getId());
+      matchInfo.setUser2(user2.getId());
+      matchInfo.setUser1Hand(hand);
+      matchInfo.setIsActive(true);
 
+      matchInfoMapper.insertMatchInfo(matchInfo);
+    } else {
+      Match match = new Match();
+      match.setUser1(activeMatchInfo.getUser1());
+      match.setUser2(activeMatchInfo.getUser2());
+      match.setUser1Hand(activeMatchInfo.getUser1Hand());
+      match.setUser2Hand(hand);
+      match.setIsActive(true);
+
+      matchMapper.insertMatch(match);
+      matchInfoMapper.updateMatchInfoNotActive(activeMatchInfo.getId());
+    }
     return "wait.html";
+
   }
 
   // じゃんけんの勝敗を判定する関数
