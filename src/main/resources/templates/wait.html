@@ -5,18 +5,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>じゃんけんゲーム</title>
+  <script>
+    window.onload = function () {
+      var sse = new EventSource('/fight/stream');
+      sse.onmessage = function (event) {
+        var match = JSON.parse(event.data);
+        var result;
+        if (match.user1Hand === match.user2Hand) {
+          result = "引き分け";
+        } else if ((match.user1Hand === "Gu" && match.user2Hand === "Choki") ||
+          (match.user1Hand === "Choki" && match.user2Hand === "Pa") ||
+          (match.user1Hand === "Pa" && match.user2Hand === "Gu")) {
+          result = "勝ち";
+        } else {
+          result = "負け";
+        }
+
+        document.getElementById("result").hidden = false;
+        document.getElementById("resultText").textContent = "Match: id " + match.id + " user1: " + match.user1 + " user2: " + match.user2 + " user1Hand: " + match.user1Hand + " user2Hand: " + match.user2Hand;
+        sse.close();
+      }
+    }
+  </script>
 </head>
 
 <body>
   <h1>相手の手を待っています</h1>
   <p>Hi <span sec:authentication="name"></span></p>
 
-  <div th:if="${match}">
+  <div id="result" hidden>
     <h2>結果</h2>
-    <span>
-      Match: id [[${match.id}]] user1: [[${match.user1}]] user2: [[${match.user2}]] user1の手: [[${match.user1Hand}]]
-      user2の手: [[${match.user2Hand}]]
-    </span>
+    <p id="resultText"></p>
     <br />
     <a href="/janken">もどる</a>
   </div>

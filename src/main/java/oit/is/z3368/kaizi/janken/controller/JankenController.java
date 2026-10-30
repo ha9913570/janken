@@ -8,12 +8,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import oit.is.z3368.kaizi.janken.model.Match;
 import oit.is.z3368.kaizi.janken.model.MatchInfo;
 import oit.is.z3368.kaizi.janken.model.MatchInfoMapper;
 import oit.is.z3368.kaizi.janken.model.User;
 import oit.is.z3368.kaizi.janken.model.UserMapper;
+import oit.is.z3368.kaizi.janken.service.AsyncKekka;
 import oit.is.z3368.kaizi.janken.model.MatchMapper;
 
 @Controller
@@ -27,6 +29,9 @@ public class JankenController {
 
   @Autowired
   private MatchInfoMapper matchInfoMapper;
+
+  @Autowired
+  private AsyncKekka asyncKekka;
 
   @GetMapping("/janken")
   public String showJanken(ModelMap model) {
@@ -55,13 +60,13 @@ public class JankenController {
 
     MatchInfo activeMatchInfo = matchInfoMapper.selectActiveMatchInfoByUser2(user2.getId());
     if (activeMatchInfo == null) {
-      MatchInfo matchInfo = new MatchInfo();
-      matchInfo.setUser1(user1.getId());
-      matchInfo.setUser2(user2.getId());
-      matchInfo.setUser1Hand(hand);
-      matchInfo.setIsActive(true);
+      activeMatchInfo = new MatchInfo();
+      activeMatchInfo.setUser1(user1.getId());
+      activeMatchInfo.setUser2(user2.getId());
+      activeMatchInfo.setUser1Hand(hand);
+      activeMatchInfo.setIsActive(true);
 
-      matchInfoMapper.insertMatchInfo(matchInfo);
+      matchInfoMapper.insertMatchInfo(activeMatchInfo);
     } else {
       Match match = new Match();
       match.setUser1(activeMatchInfo.getUser1());
@@ -73,20 +78,18 @@ public class JankenController {
       matchMapper.insertMatch(match);
       matchInfoMapper.updateMatchInfoNotActive(activeMatchInfo.getId());
     }
+    model.addAttribute("matchInfo", activeMatchInfo);
     return "wait.html";
-
   }
 
-  // じゃんけんの勝敗を判定する関数
-  private String JankenJudge(String hand1, String hand2) {
-    if (hand1.equals(hand2)) {
-      return "Draw";
-    } else if ((hand1.equals("Gu") && hand2.equals("Choki")) ||
-        (hand1.equals("Choki") && hand2.equals("Pa")) ||
-        (hand1.equals("Pa") && hand2.equals("Gu"))) {
-      return "Win";
-    } else {
-      return "Lose";
+  @GetMapping("/fight/stream")
+  public SseEmitter showFightStream() {
+    final SseEmitter emitter = new SseEmitter(60000L);
+    try {
+      asyncKekka.updateKekka(emitter);
+    } catch (Exception e) {
+      emitter.complete();
     }
+    return emitter;
   }
 }
